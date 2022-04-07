@@ -40,7 +40,8 @@ export default function ChatGroup() {
   const userId = localStorage.getItem('id_user');
   const location = useLocation();
   const { state } = location as LocationState;
-  const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(process.env.REACT_APP_BASE_URL!);
+  const baseUrl = process.env.REACT_APP_BASE_URL || '/api';
+  const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(baseUrl);
 
   const scrollToBottom = () => {
     console.log('scrolling');
