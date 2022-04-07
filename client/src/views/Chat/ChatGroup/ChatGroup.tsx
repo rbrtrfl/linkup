@@ -23,9 +23,22 @@ interface Message {
   currentUserFlag: boolean,
 }
 
+interface newMessage {
+  content: string,
+  date_created: string,
+  event_id: number,
+  id_message: number,
+  user_id: number,
+  user: {
+    first_name: string,
+    id_user: number,
+    profile_picture: string
+  }
+}
 interface ServerToClientEvents {
   noArg: () => void;
-  basicEmit: (a: number, b: string, c: Buffer) => void;
+  emitMessageFromServer: (newMessage: newMessage, a: number, b: string, c: Buffer) => void;
+  emitAllMessagesFromServer: (messages: newMessage[]) => void;
 }
 
 interface ClientToServerEvents {
@@ -54,6 +67,8 @@ export default function ChatGroup() {
   const createPost = ({
     userName, userPhoto, userId, message, currentUserFlag,
   }: Message) => {
+    console.log('message?');
+
     const containerMain = document.createElement('div');
     const containerSecondary = document.createElement('div');
     const containerTxt = document.createElement('div');
@@ -86,17 +101,28 @@ export default function ChatGroup() {
     element!.scrollTop = element!.scrollHeight;
   };
 
-  const fetchUser = (id: number) => userApi.getUserById(id).then((result) => result.data).catch();
+  socket.on('emitAllMessagesFromServer', async (messages: newMessage[]) => {
+    messages.map((oneMessage) => {
+      const currentUserFlag: boolean = oneMessage.user_id.toString() === localStorage.getItem('id_user');
+      const message = {
+        userName: oneMessage.user.first_name,
+        userPhoto: oneMessage.user.profile_picture,
+        userId: oneMessage.user.id_user,
+        message: oneMessage.content,
+        currentUserFlag,
+      };
+      createPost(message);
+    });
+  });
 
-  socket.on('basicEmit', async (userId, eventId, msg) => {
-    const fetchedUser: User = await fetchUser(userId);
-    const currentUserFlag: boolean = fetchedUser.id_user.toString() === localStorage.getItem('id_user');
+  socket.on('emitMessageFromServer', async (newMessage, userId, eventId, msg) => {
+    const currentUserFlag: boolean = newMessage.user_id.toString() === localStorage.getItem('id_user');
 
     const message: Message = {
-      userName: fetchedUser.first_name,
-      userPhoto: fetchedUser.profile_picture,
-      userId: fetchedUser.id_user,
-      message: msg.toString(),
+      userName: newMessage.user.first_name,
+      userPhoto: newMessage.user.profile_picture,
+      userId: newMessage.user.id_user,
+      message: newMessage.content.toString(),
       currentUserFlag,
     };
     if (messagesState?.length) {
