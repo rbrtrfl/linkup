@@ -9,7 +9,7 @@ import util from 'util';
 import prisma from '../db';
 import mockUsers from '../mock-data/user-mock-data.json';
 import mockEvents from '../mock-data/event-mock-data.json';
-import tags from '../mock-data/tags.json';
+import tags from '../mock-data/tags-mock-data.json';
 
 const bcrypt = require('bcrypt');
 
