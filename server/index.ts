@@ -5,20 +5,20 @@ import cors from 'cors';
 // eslint-disable-next-line
 import { Server } from "socket.io";
 import { createServer } from 'http';
+import path from 'path';
 import router from './routes/index';
 // import prisma from './db';
 import type { ServerToClientEvents, ClientToServerEvents } from './SocketTypes';
 
-const {
-  SOCKET_PORT, SERVER_URL, SERVER_PORT, SOCKET_URL,
-} = process.env;
+const PORT = process.env.PORT || 4000;
+// const {
+//   SOCKET_PORT, SERVER_URL, SERVER_PORT, SOCKET_URL,
+// } = process.env;
 
-const corsConfig = {
-  // REMOVE-START
-  origin: SERVER_URL,
-  credentials: true,
-  // REMOVE-END
-};
+// const corsConfig = {
+//   origin: SERVER_URL,
+//   credentials: true,
+// };
 
 const app = express();
 // app.use(cors(corsConfig));
@@ -47,10 +47,14 @@ io.on('connection', (socket) => {
   });
 });
 
-app.use('/', router);
+app.use('/api', router);
+app.use(express.static(path.resolve(__dirname, '../client/build')));
+app.get('/*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, '../client/build', 'index.html'));
+});
 
-httpServer.listen(SERVER_PORT, () => {
-  console.log(`🚀🚀🚀 Server up and listening on ${SERVER_URL} ! 🚀🚀🚀`); // eslint-disable-line
+httpServer.listen(PORT, () => {
+  console.log(`🚀🚀🚀 Server up and listening on ${PORT} ! 🚀🚀🚀`); // eslint-disable-line
 });
 
 export default io;
