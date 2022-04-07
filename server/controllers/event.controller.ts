@@ -59,8 +59,6 @@ const getAllEvents = async (req: Request, res: Response) => {
         },
       },
     });
-    console.log(events);
-
     res.status(200).send({ data: events });
   } catch (err) {
     res.status(500).send({ error: err });
