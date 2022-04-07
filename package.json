@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc --project ./server",
     "start": "node ./server/dist/index.js",
-    "postinstall": "cd client && npm i && npm run build && cd ../server && npm i && tsc",
+    "postinstall": "cd client && npm i && npm i --only=dev && npm run build && cd ../server && npm i && tsc",
     "deploy": "git add . && git commit -m Heroku && git push heroku heroku:main"
   },
   "repository": {
