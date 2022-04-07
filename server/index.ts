@@ -28,7 +28,7 @@ app.use(express.json());
 const httpServer = createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
   cors: {
-    // origin: SOCKET_URL,
+    // origin: SOCKET_URL ,
     origin: '*',
     methods: ['GET', 'POST'],
   },
