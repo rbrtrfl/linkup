@@ -6,8 +6,8 @@ import cors from 'cors';
 import { Server } from "socket.io";
 import { createServer } from 'http';
 import router from './routes/index';
-// import prisma from './db';
 import type { ServerToClientEvents, ClientToServerEvents } from './SocketTypes';
+import messageController from './controllers/message.controller';
 
 const {
   SOCKET_PORT, SERVER_URL, SERVER_PORT, SOCKET_URL,
@@ -35,11 +35,14 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
 });
 
 io.on('connection', (socket) => {
-  socket.on('joinRoom', (userId, eventId) => {
+  socket.on('joinRoom', async (userId, eventId) => {
     socket.join(String(eventId));
+    const allMessagesFromRoom = await messageController.getAllMessages(eventId);
+    io.in(String(eventId)).emit('emitAllMessagesFromServer', allMessagesFromRoom);
   });
-  socket.on('emitMsgFromClient', (userId, eventId, msg) => {
-    io.in(String(eventId)).emit('basicEmit', userId, eventId, msg);
+  socket.on('emitMsgFromClient', async (userId, eventId, msg) => {
+    const newMessage = await messageController.createNewMessage(userId, eventId, msg);
+    io.in(String(eventId)).emit('emitMessageFromServer', newMessage);
   });
 
   socket.on('leaveRoom', (userId, eventId) => {
