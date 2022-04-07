@@ -7,8 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc --project ./server",
     "start":"node ./server/dist/index.js",
-    "postinstall":"tsc",
-    "deploy": "git add . && git commit -m Heroku && git push heroku main"
+    "postinstall":"./server/tsc",
+    "deploy": "git add . && git commit -m Heroku && git push heroku heroku:main"
   },
   "repository": {
     "type": "git",
