@@ -18,7 +18,7 @@ export default function ChatGroup() {
   const userId = localStorage.getItem('id_user');
   const location = useLocation();
   const { state } = location as LocationState;
-  const baseUrl = process.env.REACT_APP_SOCKET_URL || window.location.origin;
+  const baseUrl = process.env.REACT_APP_SOCKET_URL!;
   const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(baseUrl);
 
   useEffect(() => {

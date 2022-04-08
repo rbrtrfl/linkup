@@ -17,14 +17,14 @@ const corsConfig = {
 };
 
 const app = express();
-app.use(cors());
+app.use(cors(corsConfig));
 app.use(morgan('short'));
 app.use(express.json());
 const httpServer = createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
   cors: {
-    // origin: process.env.SERVER_URL,
-    origin: '*',
+    origin: process.env.SERVER_URL,
+    // origin: '*',
     methods: ['GET', 'POST'],
   },
 });
