@@ -8,7 +8,7 @@ import eventApi from '../api/event.api';
 import eventActions from '../redux/actions/event.actions';
 
 export default function useFetch() {
-  const baseUrl = process.env.REACT_APP_SOCKET_URL || 'https://linkup1.herokuapp.com';
+  const baseUrl = process.env.REACT_APP_SOCKET_URL || window.location.origin;
   const dispatch: Dispatch<any> = useDispatch();
   const socket: Socket<ServerToClientEvents> = io(baseUrl);
   const [backendNotification, setBackendNotification] = useState(false);
