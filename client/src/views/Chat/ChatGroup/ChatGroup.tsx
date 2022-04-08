@@ -40,8 +40,8 @@ export default function ChatGroup() {
   const userId = localStorage.getItem('id_user');
   const location = useLocation();
   const { state } = location as LocationState;
-  const baseUrl = process.env.REACT_APP_BASE_URL || '/api';
-  const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io();
+  const baseUrl = process.env.REACT_APP_BASE_URL || 'wss://linkup1.herokuapp.com';
+  const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(baseUrl);
 
   const scrollToBottom = () => {
     console.log('scrolling');
