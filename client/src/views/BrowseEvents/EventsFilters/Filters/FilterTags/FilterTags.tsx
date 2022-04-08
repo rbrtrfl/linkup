@@ -10,7 +10,7 @@ interface myProps {
 function FilterTags({ filterByTag }: myProps) {
   const [tagList, setTagList] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
-  const baseUrl = process.env.REACT_APP_BASE_URL || '/api';
+  const baseUrl = process.env.REACT_APP_BASE_URL;
 
   useEffect(() => {
     fetch(`${baseUrl}/tags`)

@@ -2,7 +2,7 @@
 import handleError from '../helper/apiErrorHandling';
 import type { LuEvent } from '../types/Event';
 
-const baseUrl = process.env.REACT_APP_BASE_URL || '/api';
+const baseUrl = process.env.REACT_APP_BASE_URL;
 
 const eventApi = {
   getAllEvents: () => fetch(`${baseUrl}/events`)

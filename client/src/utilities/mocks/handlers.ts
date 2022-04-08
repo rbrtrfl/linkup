@@ -2,7 +2,7 @@
 import { rest } from 'msw';
 import users from './db-data/users-db-data.json';
 
-const baseUrl = process.env.REACT_APP_BASE_URL || '/api';
+const baseUrl = process.env.REACT_APP_BASE_URL;
 
 const handlers = [
   rest.get(`${baseUrl}/users/`, (req, res, ctx) => res(

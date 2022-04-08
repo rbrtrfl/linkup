@@ -1,7 +1,7 @@
 import handleError from '../helper/apiErrorHandling';
 import { User } from '../types/User';
 
-const baseUrl = process.env.REACT_APP_BASE_URL || '/api';
+const baseUrl = process.env.REACT_APP_BASE_URL;
 
 const userApi = {
 

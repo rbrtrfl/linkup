@@ -11,18 +11,19 @@ datasource db {
 }
 
 model user {
-  id_user              Int      @id @default(autoincrement())
-  first_name           String   @db.VarChar(20)
-  last_name            String   @db.VarChar(50)
-  bio                  String   @db.VarChar(255)
-  email                String   @unique @db.VarChar(255)
+  id_user              Int       @id @default(autoincrement())
+  first_name           String    @db.VarChar(20)
+  last_name            String    @db.VarChar(50)
+  bio                  String    @db.VarChar(255)
+  email                String    @unique @db.VarChar(255)
   profile_picture      String?
-  events_created       event[]  @relation(name: "created_events")
-  events_participating event[]  @relation(name: "participating_events", references: [id_event])
+  events_created       event[]   @relation(name: "created_events")
+  events_participating event[]   @relation(name: "participating_events", references: [id_event])
   password             String
-  date_created         DateTime @default(now())
-  friends              user[]   @relation(name: "friends")
-  friendsRelation      user[]   @relation(name: "friends")
+  date_created         DateTime  @default(now())
+  friends              user[]    @relation(name: "friends")
+  friendsRelation      user[]    @relation(name: "friends")
+  messages             message[]
 }
 
 model event {
@@ -49,4 +50,13 @@ model event {
 model tag {
   id_tag Int    @id @default(autoincrement())
   name   String
+}
+
+model message {
+  id_message   Int      @id @default(autoincrement())
+  user_id      Int
+  user         user     @relation(fields: [user_id], references: [id_user])
+  event_id     Int
+  content      String
+  date_created DateTime @default(now())
 }

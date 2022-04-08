@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
 export interface ServerToClientEvents {
-  basicEmit: (userId: number, eventId: number, msg: string) => void;
+  emitMessageFromServer: (newMessage: any) => void;
   changeNotification: (status: boolean) => void;
+  emitAllMessagesFromServer: (newMessage: any) => void;
 }
 export interface ClientToServerEvents {
   emitMsgFromClient: (userId: number, eventId: number, msg: string) => void;

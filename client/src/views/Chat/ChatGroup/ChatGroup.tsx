@@ -1,110 +1,34 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 import { useForm } from 'react-hook-form';
+import { v4 as uuidv4 } from 'uuid';
 import { InputTextArea } from '../../../components/Form/InputTextField/InputTextField';
 import HeaderReturn from '../../../components/HeaderReturn/HeaderReturn';
-import userApi from '../../../utilities/api/user.api';
-import { LuEvent } from '../../../utilities/types/Event';
 import { ReactComponent as IoPaperPlane } from '../../../assets/IoPaperPlane.svg';
-
+import {
+  MessageFromDb, MessageContentToDisplay, ServerToClientEvents, ClientToServerEvents, LocationState,
+} from '../../../utilities/types/ChatTypes';
 import './chatGroup.css';
-import { User } from '../../../utilities/types/User';
-import './msg.css';
-
-interface LocationState {
-  state: { currentEvent: LuEvent }
-}
-interface Message {
-  userName: string,
-  userPhoto: string,
-  userId: number,
-  message: string,
-  currentUserFlag: boolean,
-}
-
-interface ServerToClientEvents {
-  noArg: () => void;
-  basicEmit: (a: number, b: string, c: Buffer) => void;
-}
-
-interface ClientToServerEvents {
-  emitMsgFromClient: (userId: number, eventId: number, msg: string) => void;
-  joinRoom: (userId: number, eventId: number) => void;
-}
+import Message from '../../../components/Message/Message';
 
 export default function ChatGroup() {
-  const [messagesState, setMessagesState] = useState<Message[] | null>(null);
+  const [messagesState, setMessagesState] = useState<MessageContentToDisplay[] | []>([]);
   const [textareaheight, setTextareaheight] = useState(1);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const userId = localStorage.getItem('id_user');
   const location = useLocation();
   const { state } = location as LocationState;
   const baseUrl = process.env.REACT_APP_SOCKET_URL || window.location.origin;
   const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(baseUrl);
 
-  const scrollToBottom = () => {
-    console.log('scrolling');
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   useEffect(() => {
     socket.emit('joinRoom', Number(userId), state.currentEvent.id_event);
   }, []);
 
-  const createPost = ({
-    userName, userPhoto, userId, message, currentUserFlag,
-  }: Message) => {
-    const containerMain = document.createElement('div');
-    const containerSecondary = document.createElement('div');
-    const containerTxt = document.createElement('div');
-    const userNameEl = document.createElement('p');
-    const userPhotoEl = document.createElement('img');
-    const msgContentEl = document.createElement('p');
-    const containerClass = `m__containerMain--${currentUserFlag}`;
-    containerMain.classList.add('m__containerMain');
-    containerMain.classList.add(containerClass);
-    containerSecondary.classList.add('m__containerSecondary');
-    containerTxt.classList.add('m__containerTxt');
-    userNameEl.classList.add('m__userName');
-    userPhotoEl.classList.add('m__userPhoto');
-    msgContentEl.classList.add('m__content');
-    containerMain.appendChild(containerSecondary);
-    if (!currentUserFlag) {
-      containerSecondary.appendChild(userPhotoEl);
-    }
-    userPhotoEl.setAttribute('src', userPhoto);
-    userPhotoEl.setAttribute('alt', userName);
-    containerSecondary.appendChild(containerTxt);
-    if (!currentUserFlag) {
-      containerTxt.appendChild(userNameEl);
-    }
-    containerTxt.appendChild(msgContentEl);
-    msgContentEl.appendChild(document.createTextNode(message));
-    userNameEl.appendChild(document.createTextNode(`${userName} `));
-    document.getElementById('msgArea')!.appendChild(containerMain);
+  function scrollToBottom() {
     const element = document.getElementById('msgArea');
     element!.scrollTop = element!.scrollHeight;
-  };
-
-  const fetchUser = (id: number) => userApi.getUserById(id).then((result) => result.data).catch();
-
-  socket.on('basicEmit', async (userId, eventId, msg) => {
-    const fetchedUser: User = await fetchUser(userId);
-    const currentUserFlag: boolean = fetchedUser.id_user.toString() === localStorage.getItem('id_user');
-
-    const message: Message = {
-      userName: fetchedUser.first_name,
-      userPhoto: fetchedUser.profile_picture,
-      userId: fetchedUser.id_user,
-      message: msg.toString(),
-      currentUserFlag,
-    };
-    if (messagesState?.length) {
-      setMessagesState([...messagesState, message]);
-    } setMessagesState([message]);
-    createPost(message);
-  });
+  }
 
   const {
     register,
@@ -127,12 +51,50 @@ export default function ChatGroup() {
       setTextareaheight(trows);
     }
   }
+  socket.on('emitAllMessagesFromServer', (messages: MessageFromDb[]) => {
+    const allMessages: MessageContentToDisplay[] = messages.map((oneMessage) => {
+      const currentUserFlag: boolean = oneMessage.user_id.toString() === localStorage.getItem('id_user');
+      const message = {
+        userName: oneMessage.user.first_name,
+        userPhoto: oneMessage.user.profile_picture,
+        userId: oneMessage.user.id_user,
+        message: oneMessage.content,
+        currentUserFlag,
+      };
+      return message;
+    });
+    setMessagesState([...allMessages]);
+    scrollToBottom();
+  });
+
+  socket.on('emitMessageFromServer', async (newMessage) => {
+    const currentUserFlag: boolean = newMessage.user_id.toString() === localStorage.getItem('id_user');
+    const message: MessageContentToDisplay = {
+      userName: newMessage.user.first_name,
+      userPhoto: newMessage.user.profile_picture,
+      userId: newMessage.user.id_user,
+      message: newMessage.content.toString(),
+      currentUserFlag,
+    };
+    setMessagesState((prevState) => [...prevState, message]);
+    scrollToBottom();
+  });
 
   return (
     <div className="cG">
       <HeaderReturn text={state.currentEvent.title} luEvent={state.currentEvent} socket={socket} />
       <div className="cG__main-container">
-        <div id="msgArea" className="cG__chatMsgsContainer" />
+        <div id="msgArea" className="cG__chatMsgsContainer">
+          {messagesState && messagesState.map((message) => (
+            <Message
+              key={uuidv4()}
+              userName={message.userName}
+              userPhoto={message.userPhoto}
+              message={message.message}
+              currentUserFlag={message.currentUserFlag}
+            />
+          ))}
+        </div>
         <form onSubmit={handleSubmit(sendMessage)}>
           <div className="cG__input-container">
             <div className="cG__input-textarea">

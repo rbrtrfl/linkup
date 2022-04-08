@@ -7,11 +7,12 @@ import { createServer } from 'http';
 import path from 'path';
 import router from './routes/index';
 import type { ServerToClientEvents, ClientToServerEvents } from './SocketTypes';
+import messageController from './controllers/message.controller';
 
 const PORT = process.env.PORT || 4000;
 
 const corsConfig = {
-  origin: process.env.SERVER_URL,
+  origin: process.env.SOCKET_URL,
   credentials: true,
 };
 
@@ -30,11 +31,14 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
 });
 
 io.on('connection', (socket) => {
-  socket.on('joinRoom', (userId, eventId) => {
+  socket.on('joinRoom', async (userId, eventId) => {
     socket.join(String(eventId));
+    const allMessagesFromRoom = await messageController.getAllMessages(eventId);
+    io.in(String(eventId)).emit('emitAllMessagesFromServer', allMessagesFromRoom);
   });
-  socket.on('emitMsgFromClient', (userId, eventId, msg) => {
-    io.in(String(eventId)).emit('basicEmit', userId, eventId, msg);
+  socket.on('emitMsgFromClient', async (userId, eventId, msg) => {
+    const newMessage = await messageController.createNewMessage(userId, eventId, msg);
+    io.in(String(eventId)).emit('emitMessageFromServer', newMessage);
   });
 
   socket.on('leaveRoom', (userId, eventId) => {
