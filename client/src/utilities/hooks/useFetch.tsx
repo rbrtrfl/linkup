@@ -10,7 +10,7 @@ import eventActions from '../redux/actions/event.actions';
 export default function useFetch() {
   const baseUrl = process.env.REACT_APP_BASE_URL || '/api';
   const dispatch: Dispatch<any> = useDispatch();
-  const socket: Socket<ServerToClientEvents> = io(baseUrl);
+  const socket: Socket<ServerToClientEvents> = io();
   const [backendNotification, setBackendNotification] = useState(false);
   const [fetchStatus, setFetchStatus] = useState('idle');
 

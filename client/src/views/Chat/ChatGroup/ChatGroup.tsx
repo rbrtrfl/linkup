@@ -41,7 +41,7 @@ export default function ChatGroup() {
   const location = useLocation();
   const { state } = location as LocationState;
   const baseUrl = process.env.REACT_APP_BASE_URL || '/api';
-  const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(baseUrl);
+  const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io();
 
   const scrollToBottom = () => {
     console.log('scrolling');
