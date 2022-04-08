@@ -8,7 +8,7 @@
     "build": "tsc --project ./server",
     "start": "node ./server/dist/index.js",
     "postinstall": "cd client && npm i && cd ../server && npm i && tsc",
-    "deploy": "git add . && git commit -m Heroku && git push heroku heroku:main"
+    "deploy": "cd client && npm run build && cd .. && git add . && git commit -m Heroku && git push heroku heroku:main"
   },
   "repository": {
     "type": "git",
