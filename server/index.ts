@@ -1,4 +1,3 @@
-// Imports
 import express from 'express';
 import morgan from 'morgan'; // eslint-disable-line import/no-extraneous-dependencies
 import cors from 'cors';
@@ -7,29 +6,25 @@ import { Server } from "socket.io";
 import { createServer } from 'http';
 import path from 'path';
 import router from './routes/index';
-// import prisma from './db';
 import type { ServerToClientEvents, ClientToServerEvents } from './SocketTypes';
 
 const PORT = process.env.PORT || 4000;
-// const {
-//   SOCKET_PORT, SERVER_URL, SERVER_PORT, SOCKET_URL,
-// } = process.env;
 
-// const corsConfig = {
-//   origin: SERVER_URL,
-//   credentials: true,
-// };
+const corsConfig = {
+  origin: process.env.SERVER_URL,
+  credentials: true,
+};
 
 const app = express();
 // app.use(cors(corsConfig));
-app.use(cors());
+app.use(cors(corsConfig));
 app.use(morgan('short'));
 app.use(express.json());
 const httpServer = createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
   cors: {
-    // origin: SOCKET_URL ,
-    origin: '*',
+    origin: process.env.SERVER_URL,
+    // origin: '*',
     methods: ['GET', 'POST'],
   },
 });
@@ -54,7 +49,7 @@ app.get('/*', (req, res) => {
 });
 
 httpServer.listen(PORT, () => {
-  console.log(`🚀🚀🚀 Server up and listening on ${PORT} ! 🚀🚀🚀`); // eslint-disable-line
+  console.log(`🚀🚀🚀 Server up and listening on port ${PORT} ! 🚀🚀🚀`); // eslint-disable-line
 });
 
 export default io;
